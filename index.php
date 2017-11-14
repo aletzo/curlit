@@ -1,7 +1,7 @@
 <?php
 require_once 'lib/yaml/sfYamlParser.php';
 
-function getWebPage($url, $method = 'post', $params = false)
+function getWebPage($url, $method = 'post', $params = [], $headers = [])
 {
     $options = array(
         CURLOPT_RETURNTRANSFER => true, // return web page
@@ -15,14 +15,13 @@ function getWebPage($url, $method = 'post', $params = false)
         CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
     );
 
-
     $ch = curl_init();
 
     curl_setopt_array($ch, $options);
 
     switch (strtolower($method)) {
         case 'get':
-            if (is_array($params)) {
+            if ($params) {
                 $url .= '?' . http_build_query($params);
             }
             break;
@@ -33,7 +32,7 @@ function getWebPage($url, $method = 'post', $params = false)
             break;
 
         case 'put':
-            if (is_array($params)) {
+            if ($params) {
                 $url .= '?' . http_build_query($params);
             }
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -53,15 +52,21 @@ function getWebPage($url, $method = 'post', $params = false)
 
     curl_setopt($ch, CURLOPT_URL, $url);
 
-    $content = curl_exec($ch);
-    $err = curl_errno($ch);
-    $errmsg = curl_error($ch);
+    if ($headers) {
+        $headers = explode("\n", $headers);
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    }
+
+    $content  = curl_exec($ch);
+    $err      = curl_errno($ch);
+    $errmsg   = curl_error($ch);
     $response = curl_getinfo($ch);
 
     curl_close($ch);
 
-    $response['errno'] = $err;
-    $response['errmsg'] = $errmsg;
+    $response['errno']   = $err;
+    $response['errmsg']  = $errmsg;
     $response['content'] = $content;
 
     return $response;
@@ -70,12 +75,18 @@ function getWebPage($url, $method = 'post', $params = false)
 if ($_POST) {
     $yaml = new sfYamlParser();
 
-    $response = getWebPage($_POST['url'], $_POST['method'], $yaml->parse(stripslashes($_POST['params'])));
+    $response = getWebPage(
+        $_POST['url'],
+        $_POST['method'],
+        $yaml->parse(stripslashes($_POST['body'])),
+        stripslashes($_POST['headers'])
+    );
 
-//    var_dump($yaml->parse($_POST['params']));
+//    var_dump($yaml->parse($_POST['body']));
 
     $content = $response['content'];
     $content = json_decode($content, true);
+
     unset($content['checksum']);
 
     $checksum = md5(serialize($content) . 'unique_salt_ftw');
@@ -98,8 +109,11 @@ if ($_POST) {
                 margin: 30px auto 0;
             }
             textarea {
-                height: 200px;
+                height: 100px;
                 width: 500px;
+            }
+            textarea#body {
+                height: 200px;
             }
         </style>
     </head>
@@ -149,15 +163,21 @@ if ($_POST) {
                             </div>
                         </div>
                         <div class="input offset0">
-                            <textarea name="params"><?php if ($_POST) {
-    echo stripslashes($_POST['params']);
+                            <textarea name="headers" id="headers"><?php if ($_POST) {
+    echo stripslashes($_POST['headers']);
 } ?></textarea>
-                            <span class="help-inline">enter an array in yaml format</span>
+                            <span class="help-inline">request headers in <a href="https://en.wikipedia.org/wiki/YAML" target="_blank">YAML</a> format</span>
+                        </div>
+                        <div class="input offset0">
+                            <textarea name="body" id="body"><?php if ($_POST) {
+    echo stripslashes($_POST['body']);
+} ?></textarea>
+                            <span class="help-inline">request body in <a href="https://en.wikipedia.org/wiki/YAML" target="_blank">YAML</a> format</span>
                         </div>
                     </form>
 
 <?php if ($_POST) : ?>
-                        <div class="alert-message success span8 offset0">
+                        <div class="alert-message <?php echo $response['errno'] ? 'error' : 'success' ?> span8 offset0">
                             <p>
                                 http code: <b><?php echo $response['http_code'] ?></b>
                                 <br />
@@ -166,12 +186,24 @@ if ($_POST) {
                                 method: <b><?php echo strtoupper($_POST['method']) ?></b>
                                 <br />
                                 recalculated checksum: <b><?php echo $checksum ?></b>
+
+                                <?php if ($response['errno']) : ?>
+                                <br />
+                                error: <b><?php echo $response['errno'] . ' - ' .$response['errmsg'] ?></b>
+                                <?php endif ?>
                             </p>
                         </div>
                         <div class="input">
                             <textarea><?php echo stripslashes($response['content']) ?></textarea>
-                            <span class="help-inline">what the api responded</span>
+                            <span class="help-inline">what the API responded</span>
                         </div>
+                        <?php if ($content) : ?>
+                        <br>
+                        <br>
+                        <pre class="span8 offset0">
+                        <?php print_r($content) ?>
+                        </pre>
+                        <?php endif ?>
 <?php endif ?>
                 </div>
             </div>
