@@ -1,10 +1,10 @@
 # just cURL it
 
-A simple PHP cURL tool to test APIs, RESTful services etc and what-not.
+A simple PHP cURL tool to test APIs, RESTful services and what-not.
 
 
 
-## how to deploy
+## How to deploy
 
 1. git clone http://github.com/aletzo/curlit.git curlit
 2. cd curlit
@@ -12,7 +12,7 @@ A simple PHP cURL tool to test APIs, RESTful services etc and what-not.
 
 
 
-## how to send headers
+## How to set request headers
 
 You can use the first textarea to optionally send some request headers. E.g. 
 
