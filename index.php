@@ -96,7 +96,7 @@ if ($_POST) {
 <!DOCTYPE html>
 <html>
     <head>
-        <title>just curl it</title>
+        <title>just cURL it</title>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="css/bootstrap.min.css" />
         <style type="text/css">
@@ -121,7 +121,7 @@ if ($_POST) {
         <div id="wrapper" class="container">
             <div class="row">
                 <div class="span12 offset3">
-                    <h1>just curl it <small>or just simply test RESTful services!</small></h1>
+                    <h1>just cURL it <small>or just simply test RESTful services!</small></h1>
                     <form action="" method="post">
                         <div class="input offset0">
                             <input class="span8" type="text" name="url" <?php if ($_POST) : ?> value="<?php echo $_POST['url'] ?>" <?php endif ?> placeholder="enter a url" />
@@ -133,29 +133,25 @@ if ($_POST) {
                                 <ul class="inputs-list">
                                     <li>
                                         <label>
-                                            <input type="radio" value="delete" name="method" <?php if ($_POST && $_POST['method'] == 'delete')
-    echo 'checked="checked"' ?>>
+                                            <input type="radio" value="delete" name="method" <?php if ($_POST && $_POST['method'] == 'delete') { echo 'checked="checked"'; } ?>>
                                             <span>delete</span>
                                         </label>
                                     </li>
                                     <li>
                                         <label>
-                                            <input type="radio" value="get" name="method" <?php if ($_POST && $_POST['method'] == 'get')
-    echo 'checked="checked"' ?>>
+                                            <input type="radio" value="get" name="method" <?php if ($_POST && $_POST['method'] == 'get' || ! $_POST) { echo 'checked="checked"'; } ?>>
                                             <span>get</span> <span class="label notice">list</span> <span class="label notice">load</span>
                                         </label>
                                     </li>
                                     <li>
                                         <label>
-                                            <input type="radio" value="post" name="method" <?php if ($_POST && $_POST['method'] == 'post')
-    echo 'checked="checked"' ?>>
+                                            <input type="radio" value="post" name="method" <?php if ($_POST && $_POST['method'] == 'post') { echo 'checked="checked"'; } ?>>
                                             <span>post</span> <span class="label notice">create</span>
                                         </label>
                                     </li>
                                     <li>
                                         <label>
-                                            <input type="radio" value="put" name="method" <?php if ($_POST && $_POST['method'] == 'put')
-    echo 'checked="checked"' ?>>
+                                            <input type="radio" value="put" name="method" <?php if ($_POST && $_POST['method'] == 'put') { echo 'checked="checked"'; } ?>>
                                             <span>put</em></span> <span class="label notice">update</span>
                                         </label>
                                     </li>
@@ -179,17 +175,17 @@ if ($_POST) {
 <?php if ($_POST) : ?>
                         <div class="alert-message <?php echo $response['errno'] ? 'error' : 'success' ?> span8 offset0">
                             <p>
-                                http code: <b><?php echo $response['http_code'] ?></b>
-                                <br />
-                                content type: <b><?php echo $response['content_type'] ?></b>
-                                <br />
-                                method: <b><?php echo strtoupper($_POST['method']) ?></b>
-                                <br />
-                                recalculated checksum: <b><?php echo $checksum ?></b>
+                                HTTP Code: <b><?php echo $response['http_code'] ?></b>
+                                <br>
+                                Content Type: <b><?php echo $response['content_type'] ?></b>
+                                <br>
+                                Method: <b><?php echo strtoupper($_POST['method']) ?></b>
+                                <br>
+                                Recalculated Checksum: <b><?php echo $checksum ?></b>
 
                                 <?php if ($response['errno']) : ?>
-                                <br />
-                                error: <b><?php echo $response['errno'] . ' - ' .$response['errmsg'] ?></b>
+                                <br>
+                                Error: <b><?php echo $response['errno'] . ' - ' .$response['errmsg'] ?></b>
                                 <?php endif ?>
                             </p>
                         </div>
